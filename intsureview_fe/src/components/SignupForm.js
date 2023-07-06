@@ -4,30 +4,7 @@ import Container from 'react-bootstrap/esm/Container';
 import Form from 'react-bootstrap/Form';
 import React from 'react';
 import { useFormik } from 'formik';
-
-const validate = values => {
-  const errors = {};
-  if (!values.email) {
-    errors.email = ' Required';
-  } else if (!/^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,4}$/i.test(values.email)) {
-    errors.email = ' Invalid email address';
-  }
-  if (!values.paid) {
-    errors.paid = 'Required';
-  }
-  if (values.scenarios.length < 1) {
-    errors.scenarios = ' Required';
-  }
-  if (!values.frequency) {
-    errors.frequency = ' Required';
-  }
-  if (!values.brand) {
-    errors.brand = ' Required';
-  } else if (values.brand.length > 100) {
-    errors.brand = ' Must be 100 characters or less';
-  }
-  return errors;
-};
+import * as Yup from 'yup';
 
 const SignupForm = () => {
 
@@ -41,7 +18,13 @@ const SignupForm = () => {
       brand: '',
 
     },
-    validate,
+    validationSchema: Yup.object({
+      email: Yup.string().email('Invalid email address').required('Required'),
+      paid: Yup.string().required('Required'),
+      scenarios: Yup.array().min(1, 'Required'),
+      frequency: Yup.string().required('Required'),
+      brand: Yup.string().max(100, 'Must be 100 characters or less').required('Required'),
+    }),
     onSubmit: async values => {
       values.scenarios = values.scenarios.toString()
       try {
