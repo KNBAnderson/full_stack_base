@@ -1,24 +1,29 @@
-from django.contrib.auth.models import User, Group
-from rest_framework import viewsets
-from rest_framework import permissions
-from intsureview_be.apps.api.serializers import UserSerializer, GroupSerializer
+from intsureview_be.apps.api.serializers import MemberSerializer
+from .models import Member
+from rest_framework.response import Response
+from rest_framework import status
+from rest_framework.views import APIView
+from rest_framework import status
 
 
-class UserViewSet(viewsets.ModelViewSet):
+class MemberList(APIView):
     """
-    API endpoint that allows users to be viewed or edited.
-    """
-
-    queryset = User.objects.all().order_by("-date_joined")
-    serializer_class = UserSerializer
-    permission_classes = [permissions.IsAuthenticated]
-
-
-class GroupViewSet(viewsets.ModelViewSet):
-    """
-    API endpoint that allows groups to be viewed or edited.
+    List all members, or create a new member, or delete all members.
     """
 
-    queryset = Group.objects.all()
-    serializer_class = GroupSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    # A get endpoint might be handy for testing if I get to it
+    # def get(self, request, format=None):
+    #     members = Member.objects.all()
+    #     serializer = MemberSerializer(members, many=True)
+    #     return Response(serializer.data)
+
+    def post(self, request, format=None):
+        serializer = MemberSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.data, status=status.HTTP_400_BAD_REQUEST)
+
+    def delete(self, request, format=None):
+        count = Member.objects.all().delete()
+        return Response(count, status=status.HTTP_204_NO_CONTENT)
